@@ -41,7 +41,7 @@ public class FTPSourceUtils {
     @return boolean, Opens a Socket connected to a server
     and login to return True if successfully completed, false if not.
     */
-    public boolean connectToserver(){
+    public boolean connectToServer(){
         boolean success = false;
        try {
             ftpClient.connect(server, StringUtils.isEmpty(port) ? 21 : Integer.valueOf(port));

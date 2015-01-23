@@ -18,12 +18,14 @@
  *******************************************************************************/
 package org.apache.flume.source;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.flume.Context;
@@ -59,10 +62,15 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
 
     private long eventCount = 0;
 
+    // should we flush CHUNKSIZE or rather each line in the files
+    private boolean flushLines;
+
     @Override
     public void configure(Context context) {
         ftpSourceUtils = new FTPSourceUtils(context);
-        ftpSourceUtils.connectToserver();
+        ftpSourceUtils.connectToServer();
+        flushLines = StringUtils.isEmpty(context.getString("flushLines")) ? true :
+            Boolean.valueOf(context.getString("flushLines"));
         try {
             sizeFileList = loadMap("hasmap.ser");
             eventCount = loadCount("eventCount.ser");
@@ -72,7 +80,7 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
         }
     }
 
-    /*
+    /**
      * @enum Status , process source configured from context
      */
     @Override
@@ -94,8 +102,7 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
         saveMap(sizeFileList);
         saveCount(eventCount);
 
-        try
-        {
+        try {
             Thread.sleep(10000);
             return PollableSource.Status.READY; // source was successfully able to generate events
         }
@@ -106,7 +113,7 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
     }
 
     public void start(Context context) {
-        log.info("Starting sql source {} ...", getName());
+        log.info("Starting ftp source {} ...", getName());
         super.start();
     }
 
@@ -249,10 +256,9 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
         } // el listado no es vacío
     }// fin de método
 
-    /*
+    /**
      * @void Serialize hashmap
      */
-
     public void saveMap(HashMap<String, Long> map) {
         try {
             FileOutputStream fileOut = new FileOutputStream("hasmap.ser");
@@ -300,7 +306,7 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
         }
     }
 
-    /*
+    /**
      * @return long count
      */
     public long loadCount(String name) throws ClassNotFoundException, IOException {
@@ -311,7 +317,7 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
         return count;
     }
 
-    /*
+    /**
      * @void, delete file from hashmaps if deleted from ftp
      */
     public void cleanList(HashMap<String, Long> map) {
@@ -323,7 +329,7 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
         }
     }
 
-    /*
+    /**
      * read retrieved stream from ftpclient into byte[] and process
      * 
      * @return void
@@ -331,21 +337,36 @@ public class FTPSource extends AbstractSource implements Configurable, PollableS
 
     public void readStream(InputStream inputStream, String infoEvent, long position) {
         log.info(infoEvent + " ," + sizeFileList.size());
-        try {
-            inputStream.skip(position);
-            byte[] bytesArray = new byte[CHUNKSIZE];
-            int bytesRead = -1;
-            while ((bytesRead = inputStream.read(bytesArray)) != -1) {
-                ByteArrayOutputStream baostream = new ByteArrayOutputStream(CHUNKSIZE);
-                baostream.write(bytesArray, 0, bytesRead);
-                byte[] data = baostream.toByteArray();
-                processMessage(data);
+        if (flushLines) {
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
+                String line = null;
+
+                while ((line = in.readLine()) != null) {
+                    processMessage(line.getBytes());
+                }
             }
-            inputStream.close();
-            // Thread.sleep(200);
+            catch (IOException e) {
+                log.error(e.getMessage(), e);
+            }
         }
-        catch (Exception e) {
-            log.error(e.getMessage(), e);
+        else {
+            try {
+                inputStream.skip(position);
+                byte[] bytesArray = new byte[CHUNKSIZE];
+                int bytesRead = -1;
+                while ((bytesRead = inputStream.read(bytesArray)) != -1) {
+                    ByteArrayOutputStream baostream = new ByteArrayOutputStream(CHUNKSIZE);
+                    baostream.write(bytesArray, 0, bytesRead);
+                    byte[] data = baostream.toByteArray();
+                    processMessage(data);
+                }
+                inputStream.close();
+                // Thread.sleep(200);
+            }
+            catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
         }
     }
 
