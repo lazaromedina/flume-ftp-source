@@ -5,16 +5,15 @@
  */
 package org.apache.flume.source;
 
+import java.io.IOException;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
-
+import org.apache.commons.net.ftp.FTPReply;
 import org.apache.flume.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.commons.net.ftp.FTPConnectionClosedException;
-
-import java.io.IOException;
-import org.apache.commons.net.ftp.FTPReply;
 
 
 
@@ -22,8 +21,6 @@ import org.apache.commons.net.ftp.FTPReply;
  *
  * @author luis lazaro 
  */
-
-
 public class FTPSourceUtils {
     private FTPClient ftpClient;
     private String server,user,password,port;
@@ -47,22 +44,21 @@ public class FTPSourceUtils {
     public boolean connectToserver(){
         boolean success = false;
        try {
-            ftpClient.connect(server,21);
+            ftpClient.connect(server, StringUtils.isEmpty(port) ? 21 : Integer.valueOf(port));
             int replyCode = ftpClient.getReplyCode();
             if (!FTPReply.isPositiveCompletion(replyCode)) {
-                System.out.println("Connect failed");
+                log.error("Connect failed");
                 //return;
             }
             success = ftpClient.login(user, password);
             if (!success) {
-                System.out.println("Could not login to the server");
+                log.error("Could not login to the server");
                 //return;
             }
                        
            
             } catch (IOException ex) {
-                System.out.println("Oops! Something wrong happened");
-                ex.printStackTrace();
+            log.error("Oops! Something wrong happened", ex);
             }
        return success;
     }

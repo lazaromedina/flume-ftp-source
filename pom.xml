@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.apache.flume.flume-ng-sources</groupId>
     <artifactId>flume-ftp-source</artifactId>
-    <version>001</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -14,7 +14,7 @@
             <dependency>
                 <groupId>org.apache.flume</groupId>
                 <artifactId>flume-ng-core</artifactId>
-                <version>1.4.0</version>
+                <version>1.5.0</version>
           </dependency>
           <dependency>
                 <groupId>commons-net</groupId>
