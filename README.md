@@ -1,4 +1,4 @@
-flume-ftp-source
+# flume-ftp-source
 ================
 
 This forked version of ftp-flume.source is linked against flume-1.5.0.
@@ -9,22 +9,24 @@ ftp-source relies on local serialization to keep track of processed files, this 
 
 It take the following config properties:
 
-name.server             -       the name of your server
-user                    -       user name
-password                -       tpassword
-run.discover.delay      -       polling delay for new files
-port                    21      the port of the ftp server
-flushLines              true    will flush individual lines instead of the entire file to events
+| Property            |           |                                                                   |
+| --------------------|-----------|-------------------------------------------------------------------|
+| name.server         |    -      | the name of your server                                           |
+| user                |    -      | user name                                                         |
+| password            |    -      | the password                                                      |    
+| run.discover.delay  |    -      | polling delay for new files                                       |
+| port                |    21     | the port of the ftp server                                        |
+| flushLines          |    true   | will flush individual lines instead of the entire file to events  |
 
 
-Version history
+# Version history
 ================
 
 0.0.2       introduced line oriented event flushing
 
 
 
-TO DOs:
+# TO DOs:
 ================
 
 - introduce exclusion patterns for files
