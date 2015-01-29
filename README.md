@@ -11,14 +11,14 @@ ftp-source relies on local serialization to keep track of processed files, this 
 
 It take the following config properties:
 
-| Property            | Default   | Description                                                       |
-| --------------------|-----------|-------------------------------------------------------------------|
-| name.server         |    -      | the name of your server                                           |
-| user                |    -      | user name                                                         |
-| password            |    -      | the password                                                      |    
-| run.discover.delay  |    -      | polling delay for new files                                       |
-| port                |    21     | the port of the ftp server                                        |
-| flushLines          |    true   | will flush individual lines instead of the entire file to events  |
+| Property            | Default   | Description                                                         |
+| --------------------|-----------|---------------------------------------------------------------------|
+| name.server         |    -      | the name of your server                                             |
+| user                |    -      | user name                                                           |
+| password            |    -      | the password                                                        |    
+| run.discover.delay  |    -      | polling delay for new files                                         |
+| port                |    21     | the port of the ftp server                                          |
+| flushLines          |    true   | will flush individual lines instead of the entire file in 1k chunks |
 
 
 ## Version history
