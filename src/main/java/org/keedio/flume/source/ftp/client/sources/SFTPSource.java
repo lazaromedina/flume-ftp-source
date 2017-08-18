@@ -239,7 +239,7 @@ public class SFTPSource extends KeedioSource<ChannelSftp.LsEntry> {
      * @param file to check
      */
     public boolean isFile(ChannelSftp.LsEntry file) {
-        boolean isfile = false;
+        boolean isfile;
         if ((!isDirectory(file)) && (!isLink(file))) {
             isfile = true;
         } else {
